@@ -10,6 +10,7 @@ public class Election {
 	/* Constructor that receives the name of the candidate and ballot files and applies 
 	the election logic. Note: The files should be found in the input folder. */
 	public Election(String candidates_filename, String ballot_filename) {
+
 	}
 	// returns the name of the winner of the election 
 	public String getWinner() {
