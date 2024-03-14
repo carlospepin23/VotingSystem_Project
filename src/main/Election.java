@@ -10,70 +10,33 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import data_structures.ArrayList;
-import main.Candidate;
-import main.Ballot;
+import data_structures.DoublyLinkedList;
 
 
 public class Election {
+	//Se esta usando arraylist para las 3 listas de abajo porque para todas se usa mucho la funcion get
+	//y en arraylist la complejidad de get es o(1).
 	private List<Candidate> candidates=new ArrayList<Candidate>();
-	private List<Ballot> ballots=new ArrayList<Ballot>();
 	private List<ArrayList<Ballot>> board=new ArrayList<ArrayList<Ballot>>();
-	
 	private List<String> eliminated_candidates=new ArrayList<String>();
-	List<Candidate> survivors=new ArrayList<Candidate>();
+	
+	//porque no se hace shifting, y esta lista solo esta para anadir,
+	//valores, y removerselos, y en doublylinkedlist la complejidad es o(1);
+	List<Candidate> survivors=new DoublyLinkedList<Candidate>();
 	
 	int total_b=0,valid_b=0,blank_b=0,invalid_b=0,rip_v=0,winner_v=0;
 	
-	/* Constructor that implements the election logic using the files candidates.csv 
-	and ballots.csv as input. (Default constructor) */ 
+	
 	public Election() {
-		//utilize BufferedReader & FileReader to read the csv files containing the data
-				BufferedReader candidates_Reader = null,ballots_Reader=null;
-				try {
-					candidates_Reader = new BufferedReader(new FileReader("inputFiles/candidates.csv"));
-					ballots_Reader=new BufferedReader(new FileReader("inputFiles/ballots.csv"));
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				String c_line,b_line;
-				//genera lista de candidatos
-			    try {
-					while ((c_line = candidates_Reader.readLine()) != null) {
-						candidates.add(new Candidate(c_line));
-					}
-					
-					//genera lista de ballots
-				    while ((b_line = ballots_Reader.readLine()) != null) {
-				    	Ballot temp=new Ballot(b_line, candidates);
-				    	total_b++;
-				    	if(temp.getBallotType()==0) {
-				    		ballots.add(temp);
-				    		valid_b++;
-				    	}
-				    	else if(temp.getBallotType()==1) {
-				    		blank_b++;
-				    	}
-				    	else if(temp.getBallotType()==2) {
-				    		invalid_b++;
-				    	}
-				    	
-				    	
-				    	
-				    }
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		this("candidates.csv","ballots.csv");
 			    	   
 	}
 	
 	/* Constructor that receives the name of the candidate and ballot files and applies 
 	the election logic. Note: The files should be found in the input folder. */
 	public Election(String candidates_filename, String ballot_filename) {
-
-//		//utilize BufferedReader & FileReader to read the csv files containing the data
+		
+		//utilize BufferedReader & FileReader to read the csv files containing the data
 		BufferedReader candidates_Reader = null,ballots_Reader=null;
 		try {
 			candidates_Reader=new BufferedReader(new FileReader("inputFiles/"+candidates_filename));
@@ -89,25 +52,41 @@ public class Election {
 			while ((c_line = candidates_Reader.readLine()) != null) {
 				candidates.add(new Candidate(c_line));
 			}
+			//se usa mucho get, y en arrlist su complejidad es o(1).
+			List<Ballot> ballots=new ArrayList<Ballot>();
 			
 			//genera lista de ballots
 		    while ((b_line = ballots_Reader.readLine()) != null) {
 		    	Ballot temp=new Ballot(b_line, candidates);
-		    	total_b++;
-		    	if(temp.getBallotType()==0) {
-		    		ballots.add(temp);
-		    		valid_b++;
-		    	}
-		    	else if(temp.getBallotType()==1) {
-		    		blank_b++;
-		    	}
-		    	else if(temp.getBallotType()==2) {
-		    		invalid_b++;
-		    	}
+		    	//if(temp!=null) {
+		    		total_b++;
+			    	if(temp.getBallotType()==0) {
+			    		ballots.add(temp);
+			    		valid_b++;
+			    	}
+			    	else if(temp.getBallotType()==1) {
+			    		blank_b++;
+			    	}
+			    	else if(temp.getBallotType()==2) {
+			    		invalid_b++;
+			    	}
+		    	//}
+			  }
+		  
 		    	
 		    	
+		   
+
+		    for(Candidate c:candidates) { //por cada candidato
+		    	ArrayList<Ballot>t=new ArrayList<Ballot>(); //candidato i
 		    	
+		    	for(Ballot b:ballots) { //por cada papeleta de los candidatos correspondiente
+		    		t.add(b);
+		    	}
+	    		
+		    	board.add(t);
 		    }
+		    
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -116,14 +95,13 @@ public class Election {
 	}
 	// returns the name of the winner of the election 
 	public String getWinner() {
-		reclassification();
 		
 		//if the candidate has more than 50% (lucky_num) of the ballots, the candidate wins
 		int lucky_num=valid_b/2;
-		boolean found=false;
+		boolean not_found=true;
 		
-		while(found==false) {
-			//printBallotDistribution();
+		while(not_found) {
+			printBallotDistribution();
 			for(int i=0;i<board.size();i++) {
 				ArrayList<Ballot>b=board.get(i); //candidato de cada posicion correspondiente
 				Candidate c=candidates.get(i);
@@ -137,11 +115,9 @@ public class Election {
 			reclassification();	
 		
 		}
-
 		return null;
-	
 	}
-	
+	// returns the total amount of winner #1 votes
 	public int getWinnerVotes() {
 		return winner_v;
 		
@@ -168,23 +144,15 @@ public class Election {
 	must be in order of elimination. Format should be <candidate name>-<number of 1s 
 	when eliminated>*/
 	public List<String> getEliminatedCandidates() {
-		getWinner();
 		return eliminated_candidates;
 	}
 	
 	public void reclassification() {
+		ArrayList<Ballot> ballots=board.get(0);
 		board.clear();
 	    //genera lista de listas [candidato1[1,2,3], candidato2[4,5,6]]
-	    for(int i=0;i<candidates.size();i++) { //por cada candidato
-	    	ArrayList<Ballot>t=new ArrayList<Ballot>(); //candidato i
-	    	
-	    	for(int j=0;j<ballots.size();j++) { //por cada papeleta de los candidatos correspondiente
-	    		Ballot b=ballots.get(j); //papeleta j
-	    		t.add(b);
-	    		
-	    	}
-    		
-	    	board.add(t);
+	    for(Candidate c:candidates) { //por cada candidato
+	    	board.add(ballots);
 	    }
 	}
 	
@@ -195,19 +163,35 @@ public class Election {
 			survivors.add(c);
 		}
 		
-		while(r<valid_b) { //valid_b would be the max possible ballot rank
-			ArrayList<Integer> ranks_eliminatory=new ArrayList<Integer>(); //esta en orden con los candidatos
-			for(int i=0;i<board.size();i++) {
-				ranks_eliminatory.add(rank_Counter(survivors.get(i),board.get(i), r));   //c1:4,c2:3,c3:0
-			}
+		while(r<=valid_b) { //valid_b would be the max possible ballot rank
+			Candidate loser;
+			if(r<valid_b) {
+				ArrayList<Integer> ranks_eliminatory=new ArrayList<Integer>(); //esta en orden con los candidatos
+				for(int i=0;i<board.size();i++) {
+					ranks_eliminatory.add(rank_Counter(survivors.get(i),board.get(i), r));   //c1:4,c2:3,c3:0
+				}
 			
-			Candidate loser=min_Candidate(ranks_eliminatory); //esto obtiene la pos del candidato con menos votos
+				loser=min_Candidate(ranks_eliminatory); //esto obtiene la pos del candidato con menos votos
+				
+			}else {
+				loser=survivors.get(0);
+				rip_v=rank_Counter(loser,board.get(0), 1);
+				for(int i=1;i<survivors.size();i++) {
+					if(survivors.get(i).getId()>loser.getId()) {
+						loser=survivors.get(i);
+						rip_v=rank_Counter(loser,board.get(i), 1);
+					}
+					
+				}
+				
+			}
+
 			//error es que despues de encontrar el empate de los mas bajitos,busca el 2 para todos
 			if(loser!=null) { //si hay un min 
 
-				for(Ballot b:ballots) {
-					b.eliminate(loser.getId()); //
-				}
+					for(int j=0;j<board.get(0).size();j++) {
+						board.get(0).get(j).eliminate(loser.getId());
+					}
 				
 				candidates.remove(loser); // 
 				eliminated_candidates.add(loser.getName()+"-"+Integer.toString(rip_v));
@@ -217,7 +201,9 @@ public class Election {
 			
 			r++;
 				
-		}	
+		}
+		
+		
 	}
 	
 	//returns the count of the selected rank for a single candidate
@@ -232,6 +218,7 @@ public class Election {
 	
 	//returns position
 	public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {		//funciona
+		//se utiliza get en esta lista, y es mas conveniente arraylist
 		List<Integer> to_remove=new ArrayList<Integer>();
 		int min_pos=0;
 		for(int i=1;i<ranks_of_candidates.size();i++) {
@@ -268,22 +255,24 @@ public class Election {
 	* table with the vote distribution.
 	* Meant for helping in the debugging process.
 	*/
-//	public void printBallotDistribution() {
-//		System.out.println("Total ballots:" + getTotalBallots());
-//		System.out.println("Total blank ballots:" + getTotalBlankBallots());
-//		System.out.println("Total invalid ballots:" + getTotalInvalidBallots());
-//		System.out.println("Total valid ballots:" + getTotalValidBallots());
-//		//System.out.println(getEliminatedCandidates());
-//		for(Candidate c: candidates) {
-//			System.out.print(c.getName().substring(0, c.getName().indexOf(" ")) + "\t");
-//			for(Ballot b: ballots) {
-//				int rank = b.getRankByCandidate(c.getId());
-//				String tableline = "| " + ((rank != -1) ? rank: " ") + " ";
-//				System.out.print(tableline); 
-//			}
-//			System.out.println("|");
-//		}
-//	}
+	public void printBallotDistribution() {
+		System.out.println("Total ballots:" + getTotalBallots());
+		System.out.println("Total blank ballots:" + getTotalBlankBallots());
+		System.out.println("Total invalid ballots:" + getTotalInvalidBallots());
+		System.out.println("Total valid ballots:" + getTotalValidBallots());
+		System.out.println(getEliminatedCandidates());
+		for(int i=0;i<candidates.size();i++) {
+			Candidate c=candidates.get(i);
+			System.out.print(c.getName().substring(0, c.getName().indexOf(" ")) + "\t");
+			for(int j=0;j<board.get(i).size();j++) {
+				Ballot b=board.get(i).get(j);
+				int rank = b.getRankByCandidate(c.getId());
+				String tableline = "| " + ((rank != -1) ? rank: " ") + " ";
+				System.out.print(tableline); 
+			}
+			System.out.println("|");
+		}
+	}
 
 
 	
@@ -309,13 +298,16 @@ public class Election {
 	}
 
 	public static void main(String[] args) {
-		Election election1 = new Election();
-	    Election election2 = new Election("candidates.csv","ballots.csv");
-	    Election election3 = new Election("candidates.csv","ballots2.csv");
-	    
-	    outputTxtWriter(election1);
-	    outputTxtWriter(election2);
+		//Election election1 = new Election();
+	    //Election election2 = new Election("candidates.csv","ballots.csv");
+	    Election election3 = new Election("candidates.csv","ballots2.csv"); //<--AVERIGUAR PORQUE HAY ESPACIOS EN BLANCO
+		//Election election4 = new Election("candidates2.csv","ballots4.csv");
+		//System.out.println(election5.getWinner());
+	    //outputTxtWriter(election1);
+	    //outputTxtWriter(election2);
 	    outputTxtWriter(election3);
+		//outputTxtWriter(election4);
+
 	}
 }
 

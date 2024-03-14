@@ -305,6 +305,25 @@ public class StudentTester {
 						);
 				
 	
+			}	
+			
+			@Test
+			@DisplayName("Creating Election 4")
+			public void testConstructor4() {
+				Election election = new Election("candidates2.csv", "ballots4.csv");
+				
+				assertAll(
+						() -> assertTrue(election.getWinner().equals("Juan Lopez"), "Didn't get Correct winner."),
+						() -> assertTrue(election.getTotalBallots() == 4,"Didn't count correct amount of ballots"),
+						() -> assertTrue(election.getTotalBlankBallots() == 0, "Didn't count correct amount of blank ballots"),
+						() -> assertTrue(election.getTotalInvalidBallots() == 0, "Didn't count correct amount of invalid ballots"),
+						() -> assertTrue(election.getTotalBlankBallots() == 0, "Didn't count correct amount of blank ballots"),
+						() -> assertTrue(election.getTotalValidBallots() == 4, "Didn't count correct amount of valid ballots"),
+						() -> assertTrue(election.getEliminatedCandidates().get(0).equals("Pepe Perez-0"), "Didn't return correct eliminated candidate and/or count for this position"),
+						() -> assertTrue(election.getEliminatedCandidates().get(1).equals("Lola Mento-2"), "Didn't return correct eliminated candidate and/or count for this position")
+						);
+				
+	
 			}
 			
 		}

@@ -1,6 +1,7 @@
 package main;
 
 import data_structures.ArrayList;
+import data_structures.DoublyLinkedList;
 import interfaces.List;
 
 public class Ballot {
@@ -10,7 +11,9 @@ public class Ballot {
 	private boolean blank_ballot=false;
 	private List<Integer> candidate_ids=new ArrayList<Integer>();
 	private List<Integer> candidate_ranks=new ArrayList<Integer>();
-	private List<Candidate> ballot_candidates=new ArrayList<Candidate>();
+	//en esta lista se utiliza mayormente la funcion de add y no get, por ello DoublyLinkedList
+	//le aplica mejor por complejidad o(1) para dichas funciones.
+	private List<Candidate> ballot_candidates=new DoublyLinkedList<Candidate>();
 	
 	
 	/* Creates a ballot based on the line it receives. The format for line is 
