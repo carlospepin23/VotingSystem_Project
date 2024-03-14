@@ -2,13 +2,11 @@ package main;
 
 import interfaces.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-//import java.io.IOException;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import data_structures.ArrayList;
@@ -24,7 +22,7 @@ public class Election {
 	private List<String> eliminated_candidates=new ArrayList<String>();
 	List<Candidate> survivors=new ArrayList<Candidate>();
 	
-	int total_b=0,valid_b=0,blank_b=0,invalid_b=0,elim_v=0,rip_v=0;
+	int total_b=0,valid_b=0,blank_b=0,invalid_b=0,rip_v=0,winner_v=0;
 	
 	/* Constructor that implements the election logic using the files candidates.csv 
 	and ballots.csv as input. (Default constructor) */ 
@@ -125,11 +123,12 @@ public class Election {
 		boolean found=false;
 		
 		while(found==false) {
-			printBallotDistribution();
+			//printBallotDistribution();
 			for(int i=0;i<board.size();i++) {
 				ArrayList<Ballot>b=board.get(i); //candidato de cada posicion correspondiente
 				Candidate c=candidates.get(i);
 				if(rank_Counter(c,b,1)>lucky_num) {
+					winner_v=rank_Counter(c,b,1);
 					return candidates.get(i).getName();
 				}
 			}
@@ -141,7 +140,12 @@ public class Election {
 
 		return null;
 	
-	} 
+	}
+	
+	public int getWinnerVotes() {
+		return winner_v;
+		
+	}
 	// returns the total amount of ballots submitted
 	public int getTotalBallots() {
 		return total_b;
@@ -264,61 +268,54 @@ public class Election {
 	* table with the vote distribution.
 	* Meant for helping in the debugging process.
 	*/
-	public void printBallotDistribution() {
-		System.out.println("Total ballots:" + getTotalBallots());
-		System.out.println("Total blank ballots:" + getTotalBlankBallots());
-		System.out.println("Total invalid ballots:" + getTotalInvalidBallots());
-		System.out.println("Total valid ballots:" + getTotalValidBallots());
-		//System.out.println(getEliminatedCandidates());
-		for(Candidate c: candidates) {
-			System.out.print(c.getName().substring(0, c.getName().indexOf(" ")) + "\t");
-			for(Ballot b: ballots) {
-				int rank = b.getRankByCandidate(c.getId());
-				String tableline = "| " + ((rank != -1) ? rank: " ") + " ";
-				System.out.print(tableline); 
-			}
-			System.out.println("|");
-		}
-	}
+//	public void printBallotDistribution() {
+//		System.out.println("Total ballots:" + getTotalBallots());
+//		System.out.println("Total blank ballots:" + getTotalBlankBallots());
+//		System.out.println("Total invalid ballots:" + getTotalInvalidBallots());
+//		System.out.println("Total valid ballots:" + getTotalValidBallots());
+//		//System.out.println(getEliminatedCandidates());
+//		for(Candidate c: candidates) {
+//			System.out.print(c.getName().substring(0, c.getName().indexOf(" ")) + "\t");
+//			for(Ballot b: ballots) {
+//				int rank = b.getRankByCandidate(c.getId());
+//				String tableline = "| " + ((rank != -1) ? rank: " ") + " ";
+//				System.out.print(tableline); 
+//			}
+//			System.out.println("|");
+//		}
+//	}
+
 
 	
-	
-//	public static void main(String[] args) {
-//		Election election = new Election();
-			//Election election = new Election("candidates.csv", "ballots.csv");
-			
-//			assertAll(
-//			
-//					() -> assertTrue(election.getEliminatedCandidates().get(0).equals("Lola Mento-1"), "Didn't return correct eliminated candidate and/or count for this position"),
-//					() -> assertTrue(election.getEliminatedCandidates().get(1).equals("Juan Lopez-1"), "Didn't return correct eliminated candidate and/or count for this position"),
-//					() -> assertTrue(election.getEliminatedCandidates().get(2).equals("Pucho Avellanet-3"), "Didn't return correct eliminated candidate and/or count for this position")
-//					);
-			
-//		List<String> elims=election.getEliminatedCandidates();
-//		for(int i=0;i<election.getEliminatedCandidates().size();i++) {
-//			System.out.println(election.getEliminatedCandidates().get(i));
-//
-//		}
-//		System.out.println(election.getWinner());
-		
-		
-//		
-//		election.printBallotDistribution();
-//		ArrayList<Integer>test=new ArrayList<Integer>();
-//		test.add(0);
-//		test.add(6);
-//		test.add(2);
-//		test.add(5);
-//		test.add(0);
-//		System.out.println( election.min_Candidate(test));
-//		
-//		ArrayList<Integer>test=new ArrayList<Integer>();
-//		test.add(1);
-//		test.add(4);
-//		test.add(3);
-//		test.add(1);
-//		test.add(1);
-//		System.out.println( election.rank_Counter(test, 1));
-			
-//	}
+	public static void outputTxtWriter(Election election) {
+	    String name = election.getWinner().replace(" ", "_").toLowerCase();
+
+	    try (BufferedWriter writer = new BufferedWriter(new FileWriter("outputFiles/" + name + election.getWinnerVotes() + ".txt"))) {
+	        writer.write("Number of ballots: " + election.getTotalBallots()+"\n");
+	        writer.write("Number of blank ballots: " + election.getTotalBlankBallots()+"\n");
+	        writer.write("Number of invalid ballots: " + election.getTotalInvalidBallots()+"\n");
+
+	        for (int i=0;i<election.getEliminatedCandidates().size(); i++) {
+	            String n = election.getEliminatedCandidates().get(i);
+	            String[] eliminated_data = n.split("-");
+	            writer.write("Round "+(i+1)+": "+eliminated_data[0]+" was eliminated with "+eliminated_data[1]+" #1's\n");
+	           
+	        }
+	        writer.write("Winner: "+election.getWinner()+" wins with "+election.getWinnerVotes()+" #1's\n");
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	public static void main(String[] args) {
+		Election election1 = new Election();
+	    Election election2 = new Election("candidates.csv","ballots.csv");
+	    Election election3 = new Election("candidates.csv","ballots2.csv");
+	    
+	    outputTxtWriter(election1);
+	    outputTxtWriter(election2);
+	    outputTxtWriter(election3);
+	}
 }
+
