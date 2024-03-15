@@ -39,6 +39,7 @@ public class Election {
 	the election logic. Note: The files should be found in the input folder. */
 	public Election(String candidates_filename, String ballot_filename) {
 		
+		//INPUT
 		//utilize BufferedReader & FileReader to read the csv files containing the data
 		BufferedReader candidates_Reader = null,ballots_Reader=null;
 		try {
@@ -90,6 +91,9 @@ public class Election {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	    
+	    //OUTPUT
+	    outputTxtWriter();
 
 	}
 	
@@ -122,10 +126,6 @@ public String getWinner() {
 		return null;
 	}
 
-
-	
-	
-	
 	// returns the total amount of winner #1 votes
 	public int getWinnerVotes() {
 		return winner_votes;
@@ -153,9 +153,14 @@ public String getWinner() {
 	must be in order of elimination. Format should be <candidate name>-<number of 1s 
 	when eliminated>*/
 	public List<String> getEliminatedCandidates() {
-		return eliminated_candidates;
-	}
+		
+		List<String> e=new ArrayList<String>(eliminated_candidates.size());
+		for(String n:eliminated_candidates) {
+			if(n!=null) e.add(n);
+		}
+		return e;
 
+	}
 	
 	public void reclassification() {
 		ArrayList<Ballot> ballots=board.get(0);
@@ -187,26 +192,16 @@ public String getWinner() {
 			
 				loser=min_Candidate(ranks_eliminatory); //esto obtiene la pos del candidato con menos votos
 				
-			}else {
-				loser=survivors.get(0);
-				rip_votes=rank_Counter(loser,board.get(0), 1);
-				for(int i=1;i<survivors.size();i++) {
-					if(survivors.get(i).getId()>loser.getId()) {
-						loser=survivors.get(i);
-						rip_votes=rank_Counter(loser,board.get(i), 1);
-					}	
-				}
-			}
+			}else loser=tie_Breaker(survivors.get(0));
+			
 
 			//error es que despues de encontrar el empate de los mas bajitos,busca el 2 para todos
 			if(loser!=null) { //si hay un min 
-					for(int j=0;j<board.get(0).size();j++) {
-						board.get(0).get(j).eliminate(loser.getId());
-					}
+				for(int j=0;j<board.get(0).size();j++) {
+					board.get(0).get(j).eliminate(loser.getId());
+				}
 				
 				candidates.get(candidates.firstIndex(loser)).erase();
-//					candidates.remove(loser);
-				int x=0;
 
 				eliminated_candidates.add(loser.getName()+"-"+Integer.toString(rip_votes));
 				break;
@@ -226,80 +221,51 @@ public String getWinner() {
 	}
 	
 	//returns position
-	public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {		//funciona
-		//se utiliza get en esta lista, y es mas conveniente arraylist
-		List<Integer> to_remove=new ArrayList<Integer>();
-		int min_pos=0;
-		for(int i=1;i<ranks_of_candidates.size();i++) {
-			if(ranks_of_candidates.get(i)<ranks_of_candidates.get(min_pos)) {
-				min_pos=i; //arreglar que si encuentra 1 empate rapido no puede determinar que no hay mas empates!!!
-				
-			//if theres two equal mins, theres need to be a tie breaker
-			}
-			else if (ranks_of_candidates.get(i).equals(ranks_of_candidates.get(min_pos))) {
-				
-//				//desempate		
-				for(int r=0;r<ranks_of_candidates.size();r++) {
-					if(!ranks_of_candidates.get(r).equals(ranks_of_candidates.get(i))) {	
-						to_remove.add(r);
-						
-					}
+		public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {		//ARREGLAR DESEMPATE, espacios raros, Y HACER JAVADOC
+			//se utiliza get en esta lista, y es mas conveniente arraylist
+			List<Integer> to_remove=new ArrayList<Integer>();
+			int min_pos=0;
+			int tie_pos=0;
+			int tieCounter=0;
+			
+			for(int i=1;i<ranks_of_candidates.size();i++) {
+				if(ranks_of_candidates.get(i)<ranks_of_candidates.get(min_pos)) {
+					min_pos=i; 
+
+				}else if(ranks_of_candidates.get(i).equals(ranks_of_candidates.get(min_pos))) {
+
+					tie_pos=min_pos;
+					tieCounter++;
 				}
 				
+			}
+			
+			if((tie_pos==min_pos)&&(tieCounter!=ranks_of_candidates.size()-1)) {
+				//desempate		
+				for(int r=0;r<ranks_of_candidates.size();r++) {
+
+					if(!ranks_of_candidates.get(min_pos).equals(ranks_of_candidates.get(r))) {	
+						to_remove.add(r);
+					
+					}
+				}
+			
 				for(int k=to_remove.size()-1;k>=0;k--) {
 					board.remove(to_remove.get(k));
 					survivors.remove(to_remove.get(k));
 				}
-					
+				
 				return null;
 				
+				
+			}else if((tie_pos==min_pos)&&(tieCounter==ranks_of_candidates.size()-1)) {
+				//System.err.println("Eliminated by rank");
+				return tie_Breaker(survivors.get(0));
 			}
+			
+			rip_votes=rank_Counter(survivors.get(min_pos),board.get(min_pos), 1);
+			return survivors.get(min_pos);
 		}
-		
-		rip_votes=rank_Counter(survivors.get(min_pos),board.get(min_pos), 1);
-		return survivors.get(min_pos);
-	}
-	
-	//returns position
-//		public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {		//ARREGLAR DESEMPATE, espacios raros, Y HACER JAVADOC
-//			//se utiliza get en esta lista, y es mas conveniente arraylist
-//			List<Integer> to_remove=new ArrayList<Integer>();
-//			int min_pos=0;
-//			int tie_pos=0;
-//			boolean tie=false;;
-//			
-//			for(int i=1;i<ranks_of_candidates.size();i++) {
-//				if(ranks_of_candidates.get(i)<ranks_of_candidates.get(min_pos)) {
-//					min_pos=i; 
-//
-//				}else if(ranks_of_candidates.get(i).equals(ranks_of_candidates.get(min_pos))) {
-//					tie=true;
-//					tie_pos=min_pos;
-//					//tieCounter++;
-//				}
-//				
-//			}
-//			if(tie && (min_pos==tie_pos)) {
-//				//desempate		
-//				for(int r=1;r<ranks_of_candidates.size();r++) {
-//					if(!ranks_of_candidates.get(r-1).equals(ranks_of_candidates.get(r))) {	
-//						to_remove.add(r);
-//					
-//					}
-//				}
-//			
-//				for(int k=to_remove.size()-1;k>=0;k--) {
-//					board.remove(to_remove.get(k));
-//					survivors.remove(to_remove.get(k));
-//				}
-//				
-//				return null;
-//		
-//			}
-//			
-//			rip_votes=rank_Counter(survivors.get(min_pos),board.get(min_pos), 1);
-//			return survivors.get(min_pos);
-//		}
 	
 	/**
 	* Prints all the general information about the election as well as a 
@@ -331,8 +297,6 @@ public String getWinner() {
 						String tableline = "| " + ((rank != -1) ? rank: " ") + " ";
 						System.out.print(tableline); 
 					}
-					
-
 				}
 				System.out.println("|");
 				i++;
@@ -340,6 +304,17 @@ public String getWinner() {
 			
 			
 		}
+	}
+	
+	public Candidate tie_Breaker(Candidate loser) {
+		rip_votes=rank_Counter(loser,board.get(0), 1);
+		for(int i=1;i<survivors.size();i++) {
+			if(survivors.get(i).getId()>loser.getId()) {
+				loser=survivors.get(i);
+				rip_votes=rank_Counter(loser,board.get(i), 1);
+			}	
+		}
+		return loser;
 	}
 	
 	public void printCandidates(Function<Candidate,String> func) {
@@ -352,7 +327,6 @@ public String getWinner() {
 	public int countBallots(Function<Ballot,Boolean> func) {
 		int counter=0;
 		for (Ballot b : board.get(0)) {
-            //System.out.println(func.apply(b));
 			if(func.apply(b)){
 				counter++;
 			}
@@ -363,22 +337,21 @@ public String getWinner() {
 	}
 
 
-	
-	public static void outputTxtWriter(Election election) {
-	    String name = election.getWinner().replace(" ", "_").toLowerCase();
+	public void outputTxtWriter() {
+	    String name = this.getWinner().replace(" ", "_").toLowerCase();
 
-	    try (BufferedWriter writer = new BufferedWriter(new FileWriter("outputFiles/" + name + election.getWinnerVotes() + ".txt"))) {
-	        writer.write("Number of ballots: " + election.getTotalBallots()+"\n");
-	        writer.write("Number of blank ballots: " + election.getTotalBlankBallots()+"\n");
-	        writer.write("Number of invalid ballots: " + election.getTotalInvalidBallots()+"\n");
+	    try (BufferedWriter writer = new BufferedWriter(new FileWriter("outputFiles/" + name + getWinnerVotes() + ".txt"))) {
+	        writer.write("Number of ballots: " + getTotalBallots()+"\n");
+	        writer.write("Number of blank ballots: " + getTotalBlankBallots()+"\n");
+	        writer.write("Number of invalid ballots: " + getTotalInvalidBallots()+"\n");
 
-	        for (int i=0;i<election.getEliminatedCandidates().size(); i++) {
-	            String n = election.getEliminatedCandidates().get(i);
+	        for (int i=0;i<getEliminatedCandidates().size(); i++) {
+	            String n = getEliminatedCandidates().get(i);
 	            String[] eliminated_data = n.split("-");
 	            writer.write("Round "+(i+1)+": "+eliminated_data[0]+" was eliminated with "+eliminated_data[1]+" #1's\n");
 	           
 	        }
-	        writer.write("Winner: "+election.getWinner()+" wins with "+election.getWinnerVotes()+" #1's\n");
+	        writer.write("Winner: "+getWinner()+" wins with "+getWinnerVotes()+" #1's\n");
 
 	    } catch (IOException e) {
 	        e.printStackTrace();
@@ -386,20 +359,14 @@ public String getWinner() {
 	}
 
 	public static void main(String[] args) {
-		//Election election1 = new Election();
-	    //Election election2 = new Election("candidates.csv","ballots.csv");
-	    //Election election3 = new Election("candidates.csv","ballots2.csv"); //<--AVERIGUAR PORQUE HAY ESPACIOS EN BLANCO
-		//Election election5 = new Election("candidates2.csv","ballots4.csv");
+		Election election1 = new Election();
+	    Election election2 = new Election("candidates.csv","ballots.csv");
+	    Election election3 = new Election("candidates.csv","ballots2.csv"); //<--AVERIGUAR PORQUE HAY ESPACIOS EN BLANCO
+		Election election5 = new Election("candidates2.csv","ballots4.csv");
 		Election election6 = new Election("candidates.csv","ballots5.csv");
 		
 
-	    //outputTxtWriter(election1);
-	    //outputTxtWriter(election2);
-	    //outputTxtWriter(election3);
-		//outputTxtWriter(election5);
-		//outputTxtWriter(election6);
-		//System.out.println(election1.getWinner());
-		System.out.println(election6.getWinner());
+	    
 //		election3.printCandidates((c)-> c.getId() + " " + c.getName() + "" + 
 //				((c.isActive()) ? "": "+"));
 	
@@ -413,10 +380,6 @@ public String getWinner() {
 //		election1.countBallots((b) -> b.eliminate(3)); 
 	    /* Returns count of how many 
 		ballots eliminated candidate 3. */
-
-		//System.out.println(election1.getWinner());
-		
-		//System.out.println(election3.getWinner());
 
 	}
 }

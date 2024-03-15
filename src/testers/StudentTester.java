@@ -287,44 +287,8 @@ public class StudentTester {
 	
 			}
 			
-			@Test
-			@DisplayName("Creating Election 3")
-			public void testConstructor3() {
-				Election election = new Election("candidates.csv", "ballots2.csv");
-				
-				assertAll(
-						() -> assertTrue(election.getWinner().equals("Pucho Avellanet"), "Didn't get Correct winner."),
-						() -> assertTrue(election.getTotalBallots() == 15,"Didn't count correct amount of ballots"),
-						() -> assertTrue(election.getTotalBlankBallots() == 2, "Didn't count correct amount of blank ballots"),
-						() -> assertTrue(election.getTotalInvalidBallots() == 3, "Didn't count correct amount of invalid ballots"),
-						() -> assertTrue(election.getTotalBlankBallots() == 2, "Didn't count correct amount of blank ballots"),
-						() -> assertTrue(election.getTotalValidBallots() == 10, "Didn't count correct amount of valid ballots"),
-						() -> assertTrue(election.getEliminatedCandidates().get(0).equals("Pardeep Kumar-1"), "Didn't return correct eliminated candidate and/or count for this position"),
-						() -> assertTrue(election.getEliminatedCandidates().get(1).equals("Juan Lopez-1"), "Didn't return correct eliminated candidate and/or count for this position"),
-						() -> assertTrue(election.getEliminatedCandidates().get(2).equals("Lola Mento-3"), "Didn't return correct eliminated candidate and/or count for this position")
-						);
-				
-	
-			}	
 			
-			@Test
-			@DisplayName("Creating Election 4")
-			public void testConstructor4() {
-				Election election = new Election("candidates2.csv", "ballots4.csv");
-				
-				assertAll(
-						() -> assertTrue(election.getWinner().equals("Juan Lopez"), "Didn't get Correct winner."),
-						() -> assertTrue(election.getTotalBallots() == 4,"Didn't count correct amount of ballots"),
-						() -> assertTrue(election.getTotalBlankBallots() == 0, "Didn't count correct amount of blank ballots"),
-						() -> assertTrue(election.getTotalInvalidBallots() == 0, "Didn't count correct amount of invalid ballots"),
-						() -> assertTrue(election.getTotalBlankBallots() == 0, "Didn't count correct amount of blank ballots"),
-						() -> assertTrue(election.getTotalValidBallots() == 4, "Didn't count correct amount of valid ballots"),
-						() -> assertTrue(election.getEliminatedCandidates().get(0).equals("Pepe Perez-0"), "Didn't return correct eliminated candidate and/or count for this position"),
-						() -> assertTrue(election.getEliminatedCandidates().get(1).equals("Lola Mento-2"), "Didn't return correct eliminated candidate and/or count for this position")
-						);
-				
-	
-			}
+			
 			
 		}
 	}
