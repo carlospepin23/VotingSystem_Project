@@ -8,6 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.function.Function;
+
+import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
 
 import data_structures.ArrayList;
 import data_structures.DoublyLinkedList;
@@ -24,7 +27,7 @@ public class Election {
 	//valores, y removerselos, y en doublylinkedlist la complejidad es o(1);
 	List<Candidate> survivors=new DoublyLinkedList<Candidate>();
 	
-	int total_b=0,valid_b=0,blank_b=0,invalid_b=0,rip_v=0,winner_v=0;
+	int total_ballots=0,valid_ballots=0,blank_ballots=0,invalid_ballots=0,rip_votes=0,winner_votes=0;
 	
 	
 	public Election() {
@@ -46,37 +49,33 @@ public class Election {
 			e.printStackTrace();
 		}
 		
-		String c_line,b_line;
+		String candidate_line,ballot_line;
 		//genera lista de candidatos
 	    try {
-			while ((c_line = candidates_Reader.readLine()) != null) {
-				candidates.add(new Candidate(c_line));
+			while ((candidate_line = candidates_Reader.readLine()) != null) {
+				candidates.add(new Candidate(candidate_line));
 			}
 			//se usa mucho get, y en arrlist su complejidad es o(1).
 			List<Ballot> ballots=new ArrayList<Ballot>();
 			
 			//genera lista de ballots
-		    while ((b_line = ballots_Reader.readLine()) != null) {
-		    	Ballot temp=new Ballot(b_line, candidates);
-		    	//if(temp!=null) {
-		    		total_b++;
+		    while ((ballot_line = ballots_Reader.readLine()) != null) {
+		    	Ballot temp=new Ballot(ballot_line, candidates);
+
+		    		total_ballots++;
 			    	if(temp.getBallotType()==0) {
 			    		ballots.add(temp);
-			    		valid_b++;
+			    		valid_ballots++;
 			    	}
 			    	else if(temp.getBallotType()==1) {
-			    		blank_b++;
+			    		blank_ballots++;
 			    	}
 			    	else if(temp.getBallotType()==2) {
-			    		invalid_b++;
+			    		invalid_ballots++;
 			    	}
-		    	//}
 			  }
 		  
 		    	
-		    	
-		   
-
 		    for(Candidate c:candidates) { //por cada candidato
 		    	ArrayList<Ballot>t=new ArrayList<Ballot>(); //candidato i
 		    	
@@ -93,22 +92,27 @@ public class Election {
 		}
 
 	}
-	// returns the name of the winner of the election 
-	public String getWinner() {
+	
+// returns the name of the winner of the election 
+public String getWinner() {
 		
 		//if the candidate has more than 50% (lucky_num) of the ballots, the candidate wins
-		int lucky_num=valid_b/2;
+		int lucky_num=valid_ballots/2;
 		boolean not_found=true;
 		
 		while(not_found) {
 			printBallotDistribution();
-			for(int i=0;i<board.size();i++) {
-				ArrayList<Ballot>b=board.get(i); //candidato de cada posicion correspondiente
-				Candidate c=candidates.get(i);
-				if(rank_Counter(c,b,1)>lucky_num) {
-					winner_v=rank_Counter(c,b,1);
-					return candidates.get(i).getName();
-				}
+			int i=0;
+			for(Candidate c:candidates) {
+				
+				if(c.isActive()) {
+					ArrayList<Ballot>b=board.get(i); //candidato de cada posicion correspondiente
+					if(rank_Counter(c,b,1)>lucky_num) {
+						winner_votes=rank_Counter(c,b,1);
+						return c.getName();	
+					}
+					i++;		
+				}	
 			}
 			
 			eliminate_Lowest_Candidate();
@@ -117,27 +121,32 @@ public class Election {
 		}
 		return null;
 	}
+
+
+	
+	
+	
 	// returns the total amount of winner #1 votes
 	public int getWinnerVotes() {
-		return winner_v;
+		return winner_votes;
 		
 	}
 	// returns the total amount of ballots submitted
 	public int getTotalBallots() {
-		return total_b;
+		return total_ballots;
 	} 
 	// returns the total amount of invalid ballots
 	public int getTotalInvalidBallots() {
-		return invalid_b;
+		return invalid_ballots;
 
 	} 
 	// returns the total amount of blank ballots
 	public int getTotalBlankBallots() {
-		return blank_b;
+		return blank_ballots;
 	}
 	// returns the total amount of valid ballots
 	public int getTotalValidBallots() {
-		return valid_b;
+		return valid_ballots;
 	}
 	
 	/* List of names for the eliminated candidates with the numbers of 1s they had, 
@@ -146,26 +155,31 @@ public class Election {
 	public List<String> getEliminatedCandidates() {
 		return eliminated_candidates;
 	}
+
 	
 	public void reclassification() {
 		ArrayList<Ballot> ballots=board.get(0);
 		board.clear();
-	    //genera lista de listas [candidato1[1,2,3], candidato2[4,5,6]]
-	    for(Candidate c:candidates) { //por cada candidato
-	    	board.add(ballots);
-	    }
+		for(Candidate c:candidates) {
+			if(c.isActive()) {
+				board.add(ballots);
+			}
+		}
 	}
 	
 	public void eliminate_Lowest_Candidate() {
 		int r=1;
 		survivors.clear();
 		for(Candidate c:candidates) {
-			survivors.add(c);
+			if(c.isActive()) {
+				survivors.add(c);
+			}
+			
 		}
 		
-		while(r<=valid_b) { //valid_b would be the max possible ballot rank
+		while(r<=valid_ballots) { //valid_b would be the max possible ballot rank
 			Candidate loser;
-			if(r<valid_b) {
+			if(r<valid_ballots) {
 				ArrayList<Integer> ranks_eliminatory=new ArrayList<Integer>(); //esta en orden con los candidatos
 				for(int i=0;i<board.size();i++) {
 					ranks_eliminatory.add(rank_Counter(survivors.get(i),board.get(i), r));   //c1:4,c2:3,c3:0
@@ -175,35 +189,30 @@ public class Election {
 				
 			}else {
 				loser=survivors.get(0);
-				rip_v=rank_Counter(loser,board.get(0), 1);
+				rip_votes=rank_Counter(loser,board.get(0), 1);
 				for(int i=1;i<survivors.size();i++) {
 					if(survivors.get(i).getId()>loser.getId()) {
 						loser=survivors.get(i);
-						rip_v=rank_Counter(loser,board.get(i), 1);
-					}
-					
+						rip_votes=rank_Counter(loser,board.get(i), 1);
+					}	
 				}
-				
 			}
 
 			//error es que despues de encontrar el empate de los mas bajitos,busca el 2 para todos
 			if(loser!=null) { //si hay un min 
-
 					for(int j=0;j<board.get(0).size();j++) {
 						board.get(0).get(j).eliminate(loser.getId());
 					}
 				
-				candidates.remove(loser); // 
-				eliminated_candidates.add(loser.getName()+"-"+Integer.toString(rip_v));
-				
+				candidates.get(candidates.firstIndex(loser)).erase();
+//					candidates.remove(loser);
+				int x=0;
+
+				eliminated_candidates.add(loser.getName()+"-"+Integer.toString(rip_votes));
 				break;
 			}
-			
-			r++;
-				
+			r++;	
 		}
-		
-		
 	}
 	
 	//returns the count of the selected rank for a single candidate
@@ -223,12 +232,13 @@ public class Election {
 		int min_pos=0;
 		for(int i=1;i<ranks_of_candidates.size();i++) {
 			if(ranks_of_candidates.get(i)<ranks_of_candidates.get(min_pos)) {
-				min_pos=i;
+				min_pos=i; //arreglar que si encuentra 1 empate rapido no puede determinar que no hay mas empates!!!
 				
 			//if theres two equal mins, theres need to be a tie breaker
-			}else if (ranks_of_candidates.get(i).equals(ranks_of_candidates.get(min_pos))) {
+			}
+			else if (ranks_of_candidates.get(i).equals(ranks_of_candidates.get(min_pos))) {
 				
-				//desempate		
+//				//desempate		
 				for(int r=0;r<ranks_of_candidates.size();r++) {
 					if(!ranks_of_candidates.get(r).equals(ranks_of_candidates.get(i))) {	
 						to_remove.add(r);
@@ -246,32 +256,110 @@ public class Election {
 			}
 		}
 		
-		rip_v=rank_Counter(survivors.get(min_pos),board.get(min_pos), 1);
+		rip_votes=rank_Counter(survivors.get(min_pos),board.get(min_pos), 1);
 		return survivors.get(min_pos);
 	}
+	
+	//returns position
+//		public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {		//ARREGLAR DESEMPATE, espacios raros, Y HACER JAVADOC
+//			//se utiliza get en esta lista, y es mas conveniente arraylist
+//			List<Integer> to_remove=new ArrayList<Integer>();
+//			int min_pos=0;
+//			int tie_pos=0;
+//			boolean tie=false;;
+//			
+//			for(int i=1;i<ranks_of_candidates.size();i++) {
+//				if(ranks_of_candidates.get(i)<ranks_of_candidates.get(min_pos)) {
+//					min_pos=i; 
+//
+//				}else if(ranks_of_candidates.get(i).equals(ranks_of_candidates.get(min_pos))) {
+//					tie=true;
+//					tie_pos=min_pos;
+//					//tieCounter++;
+//				}
+//				
+//			}
+//			if(tie && (min_pos==tie_pos)) {
+//				//desempate		
+//				for(int r=1;r<ranks_of_candidates.size();r++) {
+//					if(!ranks_of_candidates.get(r-1).equals(ranks_of_candidates.get(r))) {	
+//						to_remove.add(r);
+//					
+//					}
+//				}
+//			
+//				for(int k=to_remove.size()-1;k>=0;k--) {
+//					board.remove(to_remove.get(k));
+//					survivors.remove(to_remove.get(k));
+//				}
+//				
+//				return null;
+//		
+//			}
+//			
+//			rip_votes=rank_Counter(survivors.get(min_pos),board.get(min_pos), 1);
+//			return survivors.get(min_pos);
+//		}
 	
 	/**
 	* Prints all the general information about the election as well as a 
 	* table with the vote distribution.
 	* Meant for helping in the debugging process.
 	*/
+	
+	//Devuelve lista de ballots
+	public ArrayList<Ballot> getBallots(){
+		return board.get(0);
+	}
+	
 	public void printBallotDistribution() {
 		System.out.println("Total ballots:" + getTotalBallots());
 		System.out.println("Total blank ballots:" + getTotalBlankBallots());
 		System.out.println("Total invalid ballots:" + getTotalInvalidBallots());
 		System.out.println("Total valid ballots:" + getTotalValidBallots());
 		System.out.println(getEliminatedCandidates());
-		for(int i=0;i<candidates.size();i++) {
-			Candidate c=candidates.get(i);
-			System.out.print(c.getName().substring(0, c.getName().indexOf(" ")) + "\t");
-			for(int j=0;j<board.get(i).size();j++) {
-				Ballot b=board.get(i).get(j);
-				int rank = b.getRankByCandidate(c.getId());
-				String tableline = "| " + ((rank != -1) ? rank: " ") + " ";
-				System.out.print(tableline); 
+		int i=0;
+		for(Candidate c:candidates) {
+			
+			if(c.isActive()) {
+				System.out.print(c.getName().substring(0, c.getName().indexOf(" ")) + "\t");
+			
+				for(int j=0;j<board.get(i).size();j++) {
+					if(c.isActive()) {
+						Ballot b=board.get(i).get(j);
+						int rank = b.getRankByCandidate(c.getId());
+						String tableline = "| " + ((rank != -1) ? rank: " ") + " ";
+						System.out.print(tableline); 
+					}
+					
+
+				}
+				System.out.println("|");
+				i++;
 			}
-			System.out.println("|");
+			
+			
 		}
+	}
+	
+	public void printCandidates(Function<Candidate,String> func) {
+		for (Candidate c : candidates) {
+            System.out.println(func.apply(c));
+        }
+		
+	}
+	
+	public int countBallots(Function<Ballot,Boolean> func) {
+		int counter=0;
+		for (Ballot b : board.get(0)) {
+            //System.out.println(func.apply(b));
+			if(func.apply(b)){
+				counter++;
+			}
+        }
+		System.out.println(Integer.toString(counter));
+		return counter;
+		
 	}
 
 
@@ -300,13 +388,35 @@ public class Election {
 	public static void main(String[] args) {
 		//Election election1 = new Election();
 	    //Election election2 = new Election("candidates.csv","ballots.csv");
-	    Election election3 = new Election("candidates.csv","ballots2.csv"); //<--AVERIGUAR PORQUE HAY ESPACIOS EN BLANCO
-		//Election election4 = new Election("candidates2.csv","ballots4.csv");
-		//System.out.println(election5.getWinner());
+	    //Election election3 = new Election("candidates.csv","ballots2.csv"); //<--AVERIGUAR PORQUE HAY ESPACIOS EN BLANCO
+		//Election election5 = new Election("candidates2.csv","ballots4.csv");
+		Election election6 = new Election("candidates.csv","ballots5.csv");
+		
+
 	    //outputTxtWriter(election1);
 	    //outputTxtWriter(election2);
-	    outputTxtWriter(election3);
-		//outputTxtWriter(election4);
+	    //outputTxtWriter(election3);
+		//outputTxtWriter(election5);
+		//outputTxtWriter(election6);
+		//System.out.println(election1.getWinner());
+		System.out.println(election6.getWinner());
+//		election3.printCandidates((c)-> c.getId() + " " + c.getName() + "" + 
+//				((c.isActive()) ? "": "+"));
+	
+//		
+//		election1.countBallots((b) -> b.getRankByCandidate(1) == 2); 
+		/* Returns count 
+		of how many ballot have candidate 1 as rank 2 */
+//		election1.countBallots((b) -> b.getRankByCandidate(2) == 2); 
+	    /* Returns count 
+		of how many ballot have candidate 2 as rank 2 */
+//		election1.countBallots((b) -> b.eliminate(3)); 
+	    /* Returns count of how many 
+		ballots eliminated candidate 3. */
+
+		//System.out.println(election1.getWinner());
+		
+		//System.out.println(election3.getWinner());
 
 	}
 }
