@@ -46,7 +46,6 @@ public class Election {
 			candidates_Reader=new BufferedReader(new FileReader("inputFiles/"+candidates_filename));
 			ballots_Reader=new BufferedReader(new FileReader("inputFiles/"+ballot_filename));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -194,8 +193,6 @@ public String getWinner() {
 				
 			}else loser=tie_Breaker(survivors.get(0));
 			
-
-			//error es que despues de encontrar el empate de los mas bajitos,busca el 2 para todos
 			if(loser!=null) { //si hay un min 
 				for(int j=0;j<board.get(0).size();j++) {
 					board.get(0).get(j).eliminate(loser.getId());
@@ -221,7 +218,7 @@ public String getWinner() {
 	}
 	
 	//returns position
-		public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {		//ARREGLAR DESEMPATE, espacios raros, Y HACER JAVADOC
+		public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {
 			//se utiliza get en esta lista, y es mas conveniente arraylist
 			List<Integer> to_remove=new ArrayList<Integer>();
 			int min_pos=0;
@@ -272,11 +269,6 @@ public String getWinner() {
 	* table with the vote distribution.
 	* Meant for helping in the debugging process.
 	*/
-	
-	//Devuelve lista de ballots
-	public ArrayList<Ballot> getBallots(){
-		return board.get(0);
-	}
 	
 	public void printBallotDistribution() {
 		System.out.println("Total ballots:" + getTotalBallots());
@@ -352,6 +344,7 @@ public String getWinner() {
 	           
 	        }
 	        writer.write("Winner: "+getWinner()+" wins with "+getWinnerVotes()+" #1's\n");
+	        writer.close();
 
 	    } catch (IOException e) {
 	        e.printStackTrace();
@@ -360,24 +353,23 @@ public String getWinner() {
 
 	public static void main(String[] args) {
 		Election election1 = new Election();
-	    Election election2 = new Election("candidates.csv","ballots.csv");
-	    Election election3 = new Election("candidates.csv","ballots2.csv"); //<--AVERIGUAR PORQUE HAY ESPACIOS EN BLANCO
-		Election election5 = new Election("candidates2.csv","ballots4.csv");
-		Election election6 = new Election("candidates.csv","ballots5.csv");
+//	    Election election2 = new Election("candidates.csv","ballots.csv");
+//	    Election election3 = new Election("candidates.csv","ballots2.csv");
+//		Election election5 = new Election("candidates2.csv","ballots4.csv");
+//		Election election6 = new Election("candidates.csv","ballots5.csv");
 		
 
-	    
-//		election3.printCandidates((c)-> c.getId() + " " + c.getName() + "" + 
-//				((c.isActive()) ? "": "+"));
+	    //Bonus Functions:
+		
+		election1.printCandidates((c)-> c.getId() + " " + c.getName() + "" + ((c.isActive()) ? "": "+"));
 	
-//		
-//		election1.countBallots((b) -> b.getRankByCandidate(1) == 2); 
+		election1.countBallots((b) -> b.getRankByCandidate(1) == 2); 
 		/* Returns count 
 		of how many ballot have candidate 1 as rank 2 */
-//		election1.countBallots((b) -> b.getRankByCandidate(2) == 2); 
+		election1.countBallots((b) -> b.getRankByCandidate(2) == 2); 
 	    /* Returns count 
 		of how many ballot have candidate 2 as rank 2 */
-//		election1.countBallots((b) -> b.eliminate(3)); 
+		election1.countBallots((b) -> b.eliminate(3)); 
 	    /* Returns count of how many 
 		ballots eliminated candidate 3. */
 
