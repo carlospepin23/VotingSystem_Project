@@ -353,15 +353,18 @@ public String getWinner() {
 
 	public static void main(String[] args) {
 		Election election1 = new Election();
-//	    Election election2 = new Election("candidates.csv","ballots.csv");
-//	    Election election3 = new Election("candidates.csv","ballots2.csv");
-//		Election election5 = new Election("candidates2.csv","ballots4.csv");
-//		Election election6 = new Election("candidates.csv","ballots5.csv");
+	    Election election2 = new Election("candidates.csv","ballots.csv");
+	    Election election3 = new Election("candidates.csv","ballots2.csv");
+		Election election5 = new Election("candidates2.csv","ballots4.csv");
+		Election election6 = new Election("candidates.csv","ballots5.csv");
 		
 
 	    //Bonus Functions:
+		System.out.println();
 		
 		election1.printCandidates((c)-> c.getId() + " " + c.getName() + "" + ((c.isActive()) ? "": "+"));
+		
+		System.out.println();
 	
 		election1.countBallots((b) -> b.getRankByCandidate(1) == 2); 
 		/* Returns count 

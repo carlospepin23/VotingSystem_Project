@@ -1,0 +1,6 @@
+Number of ballots: 4
+Number of blank ballots: 0
+Number of invalid ballots: 0
+Round 1: Pepe Perez was eliminated with 0 #1's
+Round 2: Lola Mento was eliminated with 2 #1's
+Winner: Juan Lopez wins with 4 #1's

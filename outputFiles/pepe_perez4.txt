@@ -1,0 +1,8 @@
+Number of ballots: 4
+Number of blank ballots: 0
+Number of invalid ballots: 0
+Round 1: Lola Mento was eliminated with 0 #1's
+Round 2: Pucho Avellanet was eliminated with 1 #1's
+Round 3: Juan Lopez was eliminated with 1 #1's
+Round 4: Pardeep Kumar was eliminated with 2 #1's
+Winner: Pepe Perez wins with 4 #1's
