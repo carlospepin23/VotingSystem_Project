@@ -50,7 +50,7 @@ public class Election {
 
 	/**
 	 * Default constructor that creates an election based on the candidates in
-	 * "candidates.csv" & the ballots "ballots.csv".
+	 * "candidates.csv" and the ballots "ballots.csv".
 	 */
 	public Election() {
 		this("candidates.csv", "ballots.csv");
@@ -185,15 +185,19 @@ public class Election {
 
 	/**
 	 * 
-	 * @return total amount of ballots
+	 * This method returns total amount of ballots
+	 * 
+	 * @return total amount of ballots (int)
 	 */
 	public int getTotalBallots() {
 		return total_ballots;
 	}
 
 	/**
+	 *
+	 * This method returns total amount of invalid ballots
 	 * 
-	 * @return total amount of invalid ballots (Ballot type: 2)
+	 * @return total amount of invalid ballots (int) [Ballot type: 2]
 	 */
 	public int getTotalInvalidBallots() {
 		return invalid_ballots;
@@ -202,7 +206,9 @@ public class Election {
 
 	/**
 	 * 
-	 * @return total amount of blank ballots (Ballot type: 1)
+	 * This method returns total amount of blank ballots
+	 * 
+	 * @return total amount of blank ballots (int) (Ballot type: 1)
 	 */
 	public int getTotalBlankBallots() {
 		return blank_ballots;
@@ -210,14 +216,16 @@ public class Election {
 
 	/**
 	 * 
-	 * @return total amount of valid ballots (Ballot type: 0)
+	 * This method returns total amount of valid ballots
+	 * 
+	 * @return total amount of valid ballots (int) (Ballot type: 0)
 	 */
 	public int getTotalValidBallots() {
 		return valid_ballots;
 	}
 
 	/**
-	 * List of names for the eliminated candidates with the numbers of 1s they had,
+	 * This method returns total amount of ballots the list of names for the eliminated candidates with the numbers of 1s they had,
 	 * in order of elimination.
 	 * 
 	 * @return list of eliminated candidates
@@ -235,7 +243,9 @@ public class Election {
 
 	/**
 	 * 
-	 * @return winner #1's votes
+	 * This method returns the winner #1's votes
+	 * 
+	 * @return winner #1's votes (int)
 	 */
 	public int getWinnerVotes() {
 		return winner_votes;
@@ -308,7 +318,7 @@ public class Election {
 	 * @param candidate
 	 * @param candidate_ballots
 	 * @param rank
-	 * @return candidate selected rank count on ballots
+	 * @return candidate selected rank count on ballots (int)
 	 */
 	public int rank_Counter(Candidate candidate, ArrayList<Ballot> candidate_ballots, int rank) { // funciona
 		int counter = 0;
@@ -344,7 +354,7 @@ public class Election {
 	 * the rank_Counter() class.
 	 * 
 	 * @param ranks_of_candidates
-	 * @return Candidate with the fewest votes to be eliminated
+	 * @return Candidate with the fewest votes to be eliminated (Candidate)
 	 */
 	public Candidate min_Candidate(ArrayList<Integer> ranks_of_candidates) {
 
@@ -410,7 +420,7 @@ public class Election {
 	 * This method breaks a tie between candidates w/ by using candidates ids.
 	 * 
 	 * @param loser (Candidate for tie break)
-	 * @return loser (Election loser for elimination)
+	 * @return loser (Election loser for elimination) (Candidate)
 	 */
 
 	public Candidate tie_Breaker(Candidate loser) {

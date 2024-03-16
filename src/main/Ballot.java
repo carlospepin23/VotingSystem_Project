@@ -41,7 +41,7 @@ public class Ballot {
 	private List<Candidate> ballot_candidates = new DoublyLinkedList<Candidate>();
 
 	/**
-	 * Creates a ballot based on the line it receives. The format for line is
+	 * Constructor that creates a ballot based on the line it receives. The format for line is
 	 * id#,candidate_name . It also receives a List of all the candidates in the
 	 * elections.
 	 * 
@@ -79,8 +79,10 @@ public class Ballot {
 
 	/**
 	 * 
+	 * This method returns if the candidate with the given id was eliminated
+	 * 
 	 * @param candidateId
-	 * @return if the candidate with the given id was eliminated
+	 * @return if the candidate with the given id was eliminated (boolean)
 	 */
 
 	public boolean eliminate(int candidateId) {
@@ -116,7 +118,9 @@ public class Ballot {
 
 	/**
 	 * 
-	 * @return the ballot number
+	 * This method returns the ballot number
+	 * 
+	 * @return the ballot number (int)
 	 */
 
 	public int getBallotNum() {
@@ -125,8 +129,9 @@ public class Ballot {
 
 	/**
 	 * 
-	 * @return an integer that indicates if the ballot is: 0 – valid, 1 – blank or 2
-	 *         - invalid
+	 * This method returns the ballot type
+	 * 
+	 * @return an integer that indicates if the ballot is: 0 – valid, 1 – blank or 2 - invalid (int)
 	 */
 	public int getBallotType() {
 
@@ -170,9 +175,10 @@ public class Ballot {
 
 	/**
 	 * 
+	 * This method returns the candidate id with that rank, if no candidate is available return -1.
+	 * 
 	 * @param rank
-	 * @return the candidate id with that rank, if no candidate is available return
-	 *         -1.
+	 * @return the candidate id with that rank, if no candidate is available return -1. (int)
 	 */
 	public int getCandidateByRank(int rank) {
 
@@ -188,8 +194,10 @@ public class Ballot {
 
 	/**
 	 * 
+	 * This method returns the rank for the candidate id, if no rank is available return -1
+	 * 
 	 * @param candidateID
-	 * @return the rank for the candidate id, if no rank is available return -1
+	 * @return the rank for the candidate id, if no rank is available return -1 (int)
 	 */
 
 	public int getRankByCandidate(int candidateID) {

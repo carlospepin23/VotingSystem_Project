@@ -23,7 +23,7 @@ public class Candidate {
 
 	/**
 	 * 
-	 * Creates a Candidate from the line. The line will have the format
+	 * Constructor that creates a Candidate from the line. The line will have the format
 	 * ID#,candidate_name
 	 * 
 	 * @param line
@@ -46,7 +46,9 @@ public class Candidate {
 
 	/**
 	 * 
-	 * @return the candidate’s id
+	 * This method returns the candidate id
+	 * 
+	 * @return the candidate’s id (int)
 	 */
 	public int getId() {
 		return this.id;
@@ -54,7 +56,9 @@ public class Candidate {
 
 	/**
 	 * 
-	 * @return the candidates name
+	 * This method returns the candidates name
+	 * 
+	 * @return the candidates name (String)
 	 */
 	public String getName() {
 		return this.name;
@@ -62,7 +66,9 @@ public class Candidate {
 
 	/**
 	 * 
-	 * @return whether the candidate is active in the election
+	 * This method returns whether the candidate is active in the election
+	 * 
+	 * @return whether the candidate is active in the election (boolean)
 	 */
 	public boolean isActive() {
 		return this.active == true;
