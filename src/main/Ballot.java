@@ -4,149 +4,204 @@ import data_structures.ArrayList;
 import data_structures.DoublyLinkedList;
 import interfaces.List;
 
+/**
+ * 
+ * The Ballot class pretends to be what it stands for, ballots belonging to
+ * candidates in electoral processes in class Election.
+ * 
+ * @author Carlos J. Pepin Delgado
+ * @version 3/15/2023
+ *
+ * 
+ */
 public class Ballot {
-	
-	//private properties
+
+	/**
+	 * Here are the private properties of the class, which is essential information
+	 * that a Ballot must have.
+	 */
 	private int ballot_number;
-	private boolean blank_ballot=false;
-	private List<Integer> candidate_ids=new ArrayList<Integer>();
-	private List<Integer> candidate_ranks=new ArrayList<Integer>();
-	//en esta lista se utiliza mayormente la funcion de add y no get, por ello DoublyLinkedList
-	//le aplica mejor por complejidad o(1) para dichas funciones.
-	private List<Candidate> ballot_candidates=new DoublyLinkedList<Candidate>();
-	
-	
-	/* Creates a ballot based on the line it receives. The format for line is 
-	id#,candidate_name . It also receives a List of all the candidates in the 
-	elections.*/
+	private boolean blank_ballot = false;
+
+	/**
+	 * The candidate_ids & candidates_ranks lists are ArrayList because the get() 
+	 * class method is constantly used, and the time complexity for this
+	 * class method is constant O(1).
+	 */
+
+	private List<Integer> candidate_ids = new ArrayList<Integer>();
+	private List<Integer> candidate_ranks = new ArrayList<Integer>();
+
+	/**
+	 * The ballot_candidates list is DoublyLinkedList because it is the list that
+	 * best suits it given that objects are constantly being added at the end, and
+	 * the add() time complexity in DoublyLinkedList is constant O(1).
+	 */
+
+	private List<Candidate> ballot_candidates = new DoublyLinkedList<Candidate>();
+
+	/**
+	 * Creates a ballot based on the line it receives. The format for line is
+	 * id#,candidate_name . It also receives a List of all the candidates in the
+	 * elections.
+	 * 
+	 * @param line (CSV File line to be parsed)
+	 * @param candidates
+	 * 
+	 */
+
 	public Ballot(String line, List<Candidate> candidates) {
-		//Ballot ballot = new Ballot("2,7:1,5:2,1:3,9:4,4:5,2:6,8:7,6:8,10:9,3:10", candidates);
-		String[] line_parts=line.split(",");		
+		String[] line_parts = line.split(",");
 
-			//Se guarda numero de ballot
-			this.ballot_number=Integer.parseInt(line_parts[0]);
-			
-			try {
-				//con el string limpio separa los ids de los ranks
-				String[] parsed_range=line.substring(line_parts[0].length() + 1).split(",");
-				//anade ids y ranks en listas ordenadas
-				for(String pair:parsed_range) {
-					String[] ids_ranks=pair.split(":");
-					
-					candidate_ids.add((Integer.parseInt(ids_ranks[0])));
-					candidate_ranks.add((Integer.parseInt(ids_ranks[1])));
-				}
-			} catch (Exception e) {
-				// TODO: handle exception
-				this.blank_ballot=true;
-			}
+		// Stores ballot number
+		this.ballot_number = Integer.parseInt(line_parts[0]);
 
-			//guarda los candidatos
-			for(int i=0;i<candidates.size();i++) {
-				this.ballot_candidates.add(candidates.get(i));
+		try {
+			// With clean string separates ids from ranks
+			String[] parsed_range = line.substring(line_parts[0].length() + 1).split(",");
+			// Adds ids and ranks in sorted lists
+			for (String pair : parsed_range) {
+				String[] ids_ranks = pair.split(":");
+
+				candidate_ids.add((Integer.parseInt(ids_ranks[0])));
+				candidate_ranks.add((Integer.parseInt(ids_ranks[1])));
 			}
-		
-		
+		} catch (Exception e) {
+			this.blank_ballot = true;
+		}
+
+		// Stores candidates
+		for (int i = 0; i < candidates.size(); i++) {
+			this.ballot_candidates.add(candidates.get(i));
+		}
+
 	}
-	
-	// Returns the ballot number
-	public int getBallotNum() {
-		return this.ballot_number;
-	} 
-	
 
-	//Returns the rank for that candidate, if no rank is available return -1
-	public int getRankByCandidate(int candidateID) {
-		
-		//itera por la lista de candidato para ver si lo encuentra y devolver el rank
-		for(int i=0;i<candidate_ids.size();i++) {
-			if(candidateID==candidate_ids.get(i)){
-				return candidate_ranks.get(i);
-			}
-		}
-		return -1;
-	} 
-	//Returns the candidate with that rank, if no candidate is available return -1.
-	//itera por la lista de rank para ver si lo encuentra y devolver el candidato
-	public int getCandidateByRank(int rank) {
-		for(int i=0;i<candidate_ranks.size();i++) {
-			if(rank==candidate_ranks.get(i)){
-				return candidate_ids.get(i);
-			}
-		}
-		return -1;
-	} 
-	// Eliminates the candidate with the given id
-	
+	/**
+	 * 
+	 * @param candidateId
+	 * @return if the candidate with the given id was eliminated
+	 */
+
 	public boolean eliminate(int candidateId) {
-		//primero verifica si la lista contiene el candidato
-		if(!candidate_ids.contains(candidateId)) return false;
-		
-		int erased_rank_val=-1;
-		int erased_rank_pos=-1;
-		
-		//si contiene al candidato, lo elimina de la lista de rank, id y de los candidatos activos
-		for(int i=0;i<candidate_ids.size();i++) {
-			if((candidate_ids.get(i))==candidateId) {
+		// first checks if the list contains the candidate
+		if (!candidate_ids.contains(candidateId))
+			return false;
+
+		int erased_rank_val = -1;
+		int erased_rank_pos = -1;
+
+		// if it contains the candidate, removes it from the list of rank, id and active
+		// candidates
+		for (int i = 0; i < candidate_ids.size(); i++) {
+			if ((candidate_ids.get(i)) == candidateId) {
 				candidate_ids.remove(i);
-				erased_rank_val=candidate_ranks.get(i);
-				erased_rank_pos=i;
+				erased_rank_val = candidate_ranks.get(i);
+				erased_rank_pos = i;
 				candidate_ranks.remove(i);
 				break;
 			}
 		}
-		
+
 		ballot_candidates.remove(erased_rank_pos);
-		
-		//updates ranks equal or greater by reducing 1 rank
-		for(int i=0;i<candidate_ranks.size();i++) {
-			if(candidate_ranks.get(i)>=erased_rank_val) {
-				candidate_ranks.set(i, candidate_ranks.get(i)-1);
+
+		// updates ranks equal or greater by reducing 1 rank
+		for (int i = 0; i < candidate_ranks.size(); i++) {
+			if (candidate_ranks.get(i) >= erased_rank_val) {
+				candidate_ranks.set(i, candidate_ranks.get(i) - 1);
 			}
 		}
 		return true;
-	} 
-	/* Returns an integer that indicates if the ballot is: 0 – valid, 1 – blank or 2 -
-	invalid */
+	}
+
+	/**
+	 * 
+	 * @return the ballot number
+	 */
+
+	public int getBallotNum() {
+		return this.ballot_number;
+	}
+
+	/**
+	 * 
+	 * @return an integer that indicates if the ballot is: 0 – valid, 1 – blank or 2
+	 *         - invalid
+	 */
 	public int getBallotType() {
-		
+
 		if (blank_ballot) {
 			return 1;
 		}
-		
-		for(int rank:candidate_ranks) {
-			//verifica que no haya ranks mayor a la cantidad de candidatos
-			if(rank>ballot_candidates.size()) {
+
+		for (int rank : candidate_ranks) {
+			// checks that there are no ranks greater than the number of candidates.
+			if (rank > ballot_candidates.size()) {
 				return 2;
 			}
-			//verifica que no haya duplicados de rank
-			if(candidate_ranks.firstIndex(rank)!=candidate_ranks.lastIndex(rank)) {
-				return 2;
-			}
-		}
-		
-		//verifica que no haya duplicados de ids
-		for(int id:candidate_ids) {
-			if(candidate_ids.firstIndex(id)!=candidate_ids.lastIndex(id)) {
+			// verifies for rank duplicates
+			if (candidate_ranks.firstIndex(rank) != candidate_ranks.lastIndex(rank)) {
 				return 2;
 			}
 		}
-		
-		//verifica que no se salte ningun rank
+
+		// verifies for candidates duplicates
+		for (int id : candidate_ids) {
+			if (candidate_ids.firstIndex(id) != candidate_ids.lastIndex(id)) {
+				return 2;
+			}
+		}
+
+		// verifies for skip ranks
 		List<Integer> total_ranks = new ArrayList<Integer>(candidate_ranks.size());
-		for(int i=0;i<candidate_ranks.size();i++){
-			total_ranks.add(i+1);
-		} 
-		
-		for(int r:total_ranks) {
-			if(!candidate_ranks.contains(r)) {
+		for (int i = 0; i < candidate_ranks.size(); i++) {
+			total_ranks.add(i + 1);
+		}
+
+		for (int r : total_ranks) {
+			if (!candidate_ranks.contains(r)) {
 				return 2;
 			}
 		}
-			
-		//si pasa los requirimientos, entonces el ballot es valido
+
+		// if it passes the requirements, then the ballot is valid.
 		return 0;
 	}
-	
-	
+
+	/**
+	 * 
+	 * @param rank
+	 * @return the candidate id with that rank, if no candidate is available return
+	 *         -1.
+	 */
+	public int getCandidateByRank(int rank) {
+
+		// iterates through the rank list to see if it finds it and returns the
+		// candidate.
+		for (int i = 0; i < candidate_ranks.size(); i++) {
+			if (rank == candidate_ranks.get(i)) {
+				return candidate_ids.get(i);
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * 
+	 * @param candidateID
+	 * @return the rank for the candidate id, if no rank is available return -1
+	 */
+
+	public int getRankByCandidate(int candidateID) {
+
+		// Iterates through the candidate list to see if it finds it and returns the
+		// rank.
+		for (int i = 0; i < candidate_ids.size(); i++) {
+			if (candidateID == candidate_ids.get(i)) {
+				return candidate_ranks.get(i);
+			}
+		}
+		return -1;
+	}
+
 }

@@ -1,38 +1,71 @@
 package main;
 
+/**
+ * 
+ * The Candidate class represents the people who compete in the electoral
+ * process in the Election class, and have different preference rankings
+ * assigned by the public.
+ * 
+ * 
+ * @author Carlos J. Pepin Delgado
+ * @version 3/15/2023
+ * 
+ */
 public class Candidate {
-	
 
-	//private properties
+	/**
+	 * Here are the private properties of the class, which is essential information
+	 * that a Candidate must have.
+	 */
 	private int id;
-	private boolean active=true;
+	private boolean active = true;
 	private String name;
-	
-	
-	/* Creates a Candidate from the line. The line will have the format ID#,candidate_name */
+
+	/**
+	 * 
+	 * Creates a Candidate from the line. The line will have the format
+	 * ID#,candidate_name
+	 * 
+	 * @param line
+	 * 
+	 */
+
 	public Candidate(String line) {
-		String[]data=line.split(",");
-		id=Integer.valueOf(data[0]);
-		name=data[1];
-		
-		
+		String[] data = line.split(",");
+		id = Integer.valueOf(data[0]);
+		name = data[1];
+
 	}
-	// returns the candidate’s id
+
+	/**
+	 * sets the candidate active status to false
+	 */
+	public void erase() {
+		active = false;
+	}
+
+	/**
+	 * 
+	 * @return the candidate’s id
+	 */
 	public int getId() {
 		return this.id;
-	} 
-	// Whether the candidate is still active in the election
-	public boolean isActive() {
-		return this.active==true;
-	} 
-	// return the candidates name
+	}
+
+	/**
+	 * 
+	 * @return the candidates name
+	 */
 	public String getName() {
 		return this.name;
 	}
-	//added methods
-	//eliminates candidate and it sets active to false
-	public void erase() {
-		active=false;
+
+	/**
+	 * 
+	 * @return whether the candidate is active in the election
+	 */
+	public boolean isActive() {
+		return this.active == true;
 	}
-	
+
 }
